@@ -9,14 +9,21 @@
 library(shiny)
 library(tidyverse)
 library(bslib)
+library(RColorBrewer)
 
 # load data
 df <- read.csv("data/Wnt_3_ways_R2_clean_summary.csv", header = T)
+#get lists of unique cell lines and conditions
+g_groups <- as.list(unique(df$Group))
+g_conditions <- unique(df$Condition)
 
-# global parameters
-TreatmentColours <- c("#b4d4b2", "#c96f7a", "#f3e4c2", "#aab1cf", "#f1a993")
+# create global parameters for plotting
+n_conditions <- length(g_conditions)
+c_colours <- brewer.pal(n_conditions, "Spectral")
+#display.brewer.pal(n_conditions, "Spectral")
 
-
+# make dictionary of group colours
+condition_colours <- setNames(c_colours, g_conditions)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -65,7 +72,7 @@ server <- function(input, output) {
       geom_line(linewidth = 2) +
       # geom_ribbon(alpha=0.25) + # add error shading
       theme_minimal() +
-      scale_color_manual(values = TreatmentColours) +
+      scale_color_manual(values =  condition_colours) +
       ggtitle(paste(input$group, " Elongation Index")) +
       ylab("Elongation Index") +
       xlab("Timepoint")
