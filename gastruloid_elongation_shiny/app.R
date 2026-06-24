@@ -19,8 +19,8 @@ g_conditions <- unique(df$Condition)
 
 # create global parameters for plotting
 n_conditions <- length(g_conditions)
-c_colours <- brewer.pal(n_conditions, "Spectral")
-#display.brewer.pal(n_conditions, "Spectral")
+c_colours <- brewer.pal(n_conditions, "Accent")
+#display.brewer.all(n_conditions)
 
 # make dictionary of group colours
 condition_colours <- setNames(c_colours, g_conditions)
