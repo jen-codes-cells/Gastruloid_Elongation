@@ -20,11 +20,14 @@ df <- df %>%
     EI_low = EI_Avg-EI_Sd
   )
 
-#get lists of unique cell lines and conditions
-g_groups <- as.list(unique(df$Group))
+#get unique cell lines and conditions
+g_groups <- unique(df$Group)
 g_conditions <- unique(df$Condition)
 
-# create global parameters for plotting
+# create identifiers for plotting
+n_groups <- length(g_groups)
+
+
 n_conditions <- length(g_conditions)
 c_colours <- brewer.pal(n_conditions, "Accent")
 #display.brewer.all(n_conditions)
@@ -47,7 +50,8 @@ ui <- fluidPage(
           selectInput("group",
             label = "Select Cell Line:",
             choices = c("E14tg2a", "E14_SL", "S2TB"),
-            selected = "E14_SL"
+            selected = "E14_SL",
+            multiple = TRUE
           ),
           
           selectInput("condition",
@@ -72,22 +76,23 @@ server <- function(input, output) {
   
   output$gloidPlot <- renderPlot({
     # plot here
-    p <- df |> filter(Group == input$group, Condition %in% input$condition)  
+    p <- df |> filter(Group %in% input$group, Condition %in% input$condition)  
     # the %in% operator allows none or multiple selections!!, input$condition is basically a vector when multiple choice
     
     ggplot(p, aes(x = factor(Timepoint, levels=c('72h', '96h', '120h')), y = EI_Avg, group = Condition, ymin = EI_low, ymax = EI_max, fill = Condition, colour = Condition)) +
       scale_color_manual(values =  condition_colours, aesthetics = c("colour", "fill")) +
       geom_line(linewidth = 2) +
+      geom_point(aes(shape = Group)) +
       geom_ribbon(alpha=0.2, linewidth = 0) +
       theme_minimal() +
       ggtitle(paste(input$group, " Elongation Index")) +
       ylab("Elongation Index") +
       xlab("Timepoint")
-      })
+  })
   
   output$sum_table <- renderTable({
-    t <-  df |> filter(Group == input$group , Condition %in% input$condition) 
-    }) 
+    t <-  df |> filter(Group %in% input$group , Condition %in% input$condition) 
+  }) 
   
 }
 
