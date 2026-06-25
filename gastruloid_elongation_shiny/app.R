@@ -34,19 +34,21 @@ condition_colours <- setNames(c_colours, g_conditions)
 ui <- fluidPage(
 
     # Application title
-    titlePanel("Simple Gastruloid Elongation"),
+    titlePanel("Wnt Pathway Effects on Gastruloid Elongation"),
 
     # Sidebar with a select input for cell line (group) 
     sidebarLayout(
         sidebarPanel(
-          title = "Gastruloid Elongation",
-            # table input here
+          title = "Settings",
+          
+          # table input here
+          fileInput("input_table", "Choose a file to analyse:"),
+          
           # select cell line here
           selectInput("group",
             label = "Select Cell Line:",
             choices = c("E14tg2a", "E14_SL", "S2TB"),
-            selected = "E14_SL",
-            multiple = TRUE
+            selected = "E14_SL"
           ),
           
           selectInput("condition",
@@ -71,6 +73,13 @@ server <- function(input, output) {
   
   output$gloidPlot <- renderPlot({
     # plot here
+    df <- read.csv(input$input_table$datapath, header = T)
+    df <- df %>% 
+      mutate(
+        EI_max = EI_Avg+EI_Sd,
+        EI_low = EI_Avg-EI_Sd
+      )
+      
     p <- df |> filter(Group == input$group, Condition %in% input$condition)  
     # the %in% operator allows none or multiple selections!!, input$condition is basically a vector when multiple choice
     
@@ -85,7 +94,7 @@ server <- function(input, output) {
   })
   
   output$sum_table <- renderTable({
-    t <-  df |> filter(Group == input$group , Condition %in% input$condition) 
+    df <- read.csv(input$input_table$datapath, header = T) |> filter(Group == input$group , Condition %in% input$condition) 
   }) 
   
 }
