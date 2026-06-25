@@ -13,6 +13,7 @@ library(RColorBrewer)
 
 # load data
 df <- read.csv("data/Wnt_3_ways_R2_clean_summary.csv", header = T)
+
 # calculate standard deviaton for shading
 df <- df %>% 
   mutate(
@@ -20,14 +21,8 @@ df <- df %>%
     EI_low = EI_Avg-EI_Sd
   )
 
-#get unique cell lines and conditions
-g_groups <- unique(df$Group)
-g_conditions <- unique(df$Condition)
-
 # create identifiers for plotting
-n_groups <- length(g_groups)
-
-
+g_conditions <- unique(df$Condition)
 n_conditions <- length(g_conditions)
 c_colours <- brewer.pal(n_conditions, "Accent")
 #display.brewer.all(n_conditions)
@@ -76,13 +71,12 @@ server <- function(input, output) {
   
   output$gloidPlot <- renderPlot({
     # plot here
-    p <- df |> filter(Group %in% input$group, Condition %in% input$condition)  
+    p <- df |> filter(Group == input$group, Condition %in% input$condition)  
     # the %in% operator allows none or multiple selections!!, input$condition is basically a vector when multiple choice
     
     ggplot(p, aes(x = factor(Timepoint, levels=c('72h', '96h', '120h')), y = EI_Avg, group = Condition, ymin = EI_low, ymax = EI_max, fill = Condition, colour = Condition)) +
       scale_color_manual(values =  condition_colours, aesthetics = c("colour", "fill")) +
       geom_line(linewidth = 2) +
-      geom_point(aes(shape = Group)) +
       geom_ribbon(alpha=0.2, linewidth = 0) +
       theme_minimal() +
       ggtitle(paste(input$group, " Elongation Index")) +
@@ -91,7 +85,7 @@ server <- function(input, output) {
   })
   
   output$sum_table <- renderTable({
-    t <-  df |> filter(Group %in% input$group , Condition %in% input$condition) 
+    t <-  df |> filter(Group == input$group , Condition %in% input$condition) 
   }) 
   
 }
